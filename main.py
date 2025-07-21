@@ -10,13 +10,27 @@ import os
 import nltk
 
 
+NLTK_DATA_PATH = os.path.join(os.path.dirname(__file__), "nltk_data")
+if not os.path.exists(NLTK_DATA_PATH):
+    os.makedirs(NLTK_DATA_PATH)
+nltk.data.path.append(NLTK_DATA_PATH)
+
 @st.cache_resource
 def download_nltk_data():
     try:
-        nltk.data.find('corpora/brown') 
+        nltk.data.find('corpora/brown', paths=[NLTK_DATA_PATH])
     except nltk.downloader.DownloadError:
-        nltk.download('punkt')
-        nltk.download('brown') 
+        st.warning("NLTK data not found, attempting download...")
+        try:
+            nltk.download('punkt', download_dir=NLTK_DATA_PATH)
+            nltk.download('brown', download_dir=NLTK_DATA_PATH)
+            st.success("NLTK data downloaded successfully!")
+        except Exception as e:
+            st.error(f"Failed to download NLTK data: {e}")
+            raise e
+    except Exception as e: 
+        st.error(f"An unexpected error occurred while checking NLTK data: {e}")
+        raise e
 
 download_nltk_data()
 
